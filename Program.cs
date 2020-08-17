@@ -8,14 +8,15 @@ namespace Discount
         private static void Main()
         {
             // исходный товар
-            var item = new Item("Шапка", 1.25);
+            var item = new Item("Товар1", 1.25);
 
             // на витрине 3 позиции
             var showcase = new List<ISellableItem>();
             ISellableItem baseItem = new BaseItem(item);
             showcase.Add(baseItem);
-            showcase.Add(new DiscountedItem(baseItem, 0));
             showcase.Add(new DiscountedItem(baseItem, 10));
+            showcase.Add(new DiscountedItem(baseItem, 20));
+            showcase.Add(new DiscountedItem(baseItem, 30));
             PrintShowcase(showcase);
 
             // меняем цену товара
