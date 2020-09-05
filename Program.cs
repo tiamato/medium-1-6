@@ -10,7 +10,7 @@ namespace Discount
             // исходный товар
             var item = new Item("Товар1", 1.25);
 
-            // на витрине 3 позиции
+            // на витрине 4 позиции, из них 3 с разными скидками
             var showcase = new List<ISellableItem>();
             ISellableItem baseItem = new BaseItem(item);
             showcase.Add(baseItem);
@@ -23,7 +23,7 @@ namespace Discount
             item.Price = 10.35f;
             PrintShowcase(showcase);
 
-            // меняем способ доставки
+            // меняем способ доставки и цену для базового
             baseItem.Delivery = new Pickup(5);
             PrintShowcase(showcase);
 
@@ -66,6 +66,7 @@ namespace Discount
         private const double DefaultPrice = 10;
 
         public Pickup(double price) : base(price) { }
+
         public Pickup() : base(DefaultPrice) { }
 
         public override string ToString()
@@ -79,6 +80,7 @@ namespace Discount
         private const double DefaultPrice = 50;
 
         public Courier(double price) : base(price) { }
+
         public Courier() : base(DefaultPrice) { }
 
         public override string ToString()
@@ -108,15 +110,15 @@ namespace Discount
 
     public class BaseItem : ISellableItem
     {
-        public Item Item { get; }
-        public Delivery Delivery { get; set; }
-        public double TotalPrice => Item.Price + Delivery.Price;
-
         public BaseItem(Item item)
         {
             Item = item;
             Delivery = new Courier();
         }
+
+        public Item Item { get; }
+        public Delivery Delivery { get; set; }
+        public double TotalPrice => Item.Price + Delivery.Price;
 
         public override string ToString()
         {
@@ -133,7 +135,6 @@ namespace Discount
         private readonly int _discount;
         private Delivery _delivery;
 
-        public Item Item  => _item.Item;
         public Delivery Delivery
         {
             get => _delivery;
@@ -146,6 +147,8 @@ namespace Discount
                 _delivery = value;
             }
         }
+
+        public Item Item => _item.Item;
         public double TotalPrice => Item.Price - GetDiscount() + Delivery.Price;
 
         public DiscountedItem(ISellableItem item, int discount)
@@ -155,11 +158,6 @@ namespace Discount
             _delivery = new Pickup();
         }
 
-        private double GetDiscount()
-        {
-            return Item.Price * _discount / 100;
-        }
-
         public override string ToString()
         {
             return $"Наименование: {Item.Name}" +
@@ -167,6 +165,11 @@ namespace Discount
                    $", скидка: {GetDiscount():0.00} ({_discount}%)" +
                    $", доставка: {_delivery}" +
                    $", итого: {TotalPrice:0.00}";
+        }
+
+        private double GetDiscount()
+        {
+            return Item.Price * _discount / 100;
         }
     }
 }
