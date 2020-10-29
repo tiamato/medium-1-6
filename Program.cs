@@ -11,12 +11,12 @@ namespace Discount
             var item = new Item("Товар1", 1.25);
 
             // на витрине 4 позиции, из них 3 с разными скидками
-            var showcase = new List<ISellableItem>();
-            ISellableItem baseItem = new BaseItem(item);
-            showcase.Add(baseItem);
-            showcase.Add(new DiscountedItem(baseItem, 10));
-            showcase.Add(new DiscountedItem(baseItem, 20));
-            showcase.Add(new DiscountedItem(baseItem, 30));
+            var showcase = new List<ISellablePosition>();
+            ISellablePosition basePosition = new BasePosition(item);
+            showcase.Add(basePosition);
+            showcase.Add(new DiscountedPosition(basePosition, 10));
+            showcase.Add(new DiscountedPosition(basePosition, 20));
+            showcase.Add(new DiscountedPosition(basePosition, 30));
             PrintShowcase(showcase);
 
             // меняем цену товара
@@ -24,10 +24,10 @@ namespace Discount
             PrintShowcase(showcase);
 
             // меняем способ доставки и цену для базового
-            baseItem.Delivery = new Pickup(5);
+            basePosition.Delivery = new Pickup(5);
             PrintShowcase(showcase);
 
-            baseItem.Delivery = new Courier(25);
+            basePosition.Delivery = new Courier(25);
             PrintShowcase(showcase);
 
             //Присваиваем неверный тип доставки для товара со скидкой - ошибка
@@ -36,11 +36,11 @@ namespace Discount
             Console.Read();
         }
 
-        private static void PrintShowcase(IEnumerable<ISellableItem> showcase)
+        private static void PrintShowcase(IEnumerable<ISellablePosition> showcase)
         {
-            foreach (var item in showcase)
+            foreach (var position in showcase)
             {
-                Console.WriteLine(item);
+                Console.WriteLine(position);
             }
             Console.WriteLine("---");
         }
@@ -101,16 +101,16 @@ namespace Discount
         }
     }
 
-    public interface ISellableItem
+    public interface ISellablePosition
     {
         Item Item { get; }
         Delivery Delivery { get; set; }
         double TotalPrice { get; }
     }
 
-    public class BaseItem : ISellableItem
+    public class BasePosition : ISellablePosition
     {
-        public BaseItem(Item item)
+        public BasePosition(Item item)
         {
             Item = item;
             Delivery = new Courier();
@@ -129,9 +129,9 @@ namespace Discount
         }
     }
 
-    public class DiscountedItem : ISellableItem
+    public class DiscountedPosition : ISellablePosition
     {
-        private readonly ISellableItem _item;
+        private readonly ISellablePosition _position;
         private readonly int _discount;
         private Delivery _delivery;
 
@@ -148,12 +148,12 @@ namespace Discount
             }
         }
 
-        public Item Item => _item.Item;
+        public Item Item => _position.Item;
         public double TotalPrice => Item.Price - GetDiscount() + Delivery.Price;
 
-        public DiscountedItem(ISellableItem item, int discount)
+        public DiscountedPosition(ISellablePosition position, int discount)
         {
-            _item = item;
+            _position = position;
             _discount = discount;
             _delivery = new Pickup();
         }
