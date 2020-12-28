@@ -7,10 +7,10 @@ namespace Discount
     {
         private static void Main()
         {
-            // исходный товар
-            var item = new Item("Товар1", 1.25);
+            // РёСЃС…РѕРґРЅС‹Р№ С‚РѕРІР°СЂ
+            var item = new Item("РўРѕРІР°СЂ1", 1.25);
 
-            // на витрине 4 позиции, из них 3 с разными скидками
+            // РЅР° РІРёС‚СЂРёРЅРµ 4 РїРѕР·РёС†РёРё, РёР· РЅРёС… 3 СЃ СЂР°Р·РЅС‹РјРё СЃРєРёРґРєР°РјРё
             var order = new Order();
             ISellablePosition basePosition = new BasePosition(item);
             order.AddPosition(basePosition);
@@ -19,15 +19,15 @@ namespace Discount
             order.AddPosition(new DiscountedPosition(basePosition, 30));
             order.Print();
 
-            // меняем цену товара
+            // РјРµРЅСЏРµРј С†РµРЅСѓ С‚РѕРІР°СЂР°
             item.Price = 10.35f;
             order.Print();
 
-            // меняем способ доставки и цену для базового
+            // РјРµРЅСЏРµРј СЃРїРѕСЃРѕР± РґРѕСЃС‚Р°РІРєРё Рё С†РµРЅСѓ РґР»СЏ Р±Р°Р·РѕРІРѕРіРѕ
             order.Delivery = new Pickup(5);
             order.Print();
 
-            //Присваиваем неверный тип доставки для заказа с товарами имеющими скидку - ошибка
+            //РџСЂРёСЃРІР°РёРІР°РµРј РЅРµРІРµСЂРЅС‹Р№ С‚РёРї РґРѕСЃС‚Р°РІРєРё РґР»СЏ Р·Р°РєР°Р·Р° СЃ С‚РѕРІР°СЂР°РјРё РёРјРµСЋС‰РёРјРё СЃРєРёРґРєСѓ - РѕС€РёР±РєР°
             try
             {
                 order.Delivery = new Courier(25);
@@ -38,12 +38,12 @@ namespace Discount
                 Console.WriteLine("---");
             }
 
-            //Удаляем позиции со скидкой. Повторяем операцию
+            //РЈРґР°Р»СЏРµРј РїРѕР·РёС†РёРё СЃРѕ СЃРєРёРґРєРѕР№. РџРѕРІС‚РѕСЂСЏРµРј РѕРїРµСЂР°С†РёСЋ
             order.RemoveDiscounted();
             order.Delivery = new Courier(25);
             order.Print();
 
-            //Пытаемся добавить товар со скидкой - ошибка
+            //РџС‹С‚Р°РµРјСЃСЏ РґРѕР±Р°РІРёС‚СЊ С‚РѕРІР°СЂ СЃРѕ СЃРєРёРґРєРѕР№ - РѕС€РёР±РєР°
             try
             {
                 order.AddPosition(new DiscountedPosition(basePosition, 30));
@@ -73,7 +73,7 @@ namespace Discount
 
         public override string ToString()
         {
-            return $"Наименование: {_name}, цена: {Price:0.00}";
+            return $"РќР°РёРјРµРЅРѕРІР°РЅРёРµ: {_name}, С†РµРЅР°: {Price:0.00}";
         }
     }
 
@@ -109,10 +109,10 @@ namespace Discount
             _position = position;
 
             if (discount < 0)
-                throw new ArgumentOutOfRangeException(nameof(discount), "Значение не может быть меньше 0");
+                throw new ArgumentOutOfRangeException(nameof(discount), "Р—РЅР°С‡РµРЅРёРµ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РјРµРЅСЊС€Рµ 0");
 
             if (discount > 100)
-                throw new ArgumentOutOfRangeException(nameof(discount), "Значение не может быть больше 100");
+                throw new ArgumentOutOfRangeException(nameof(discount), "Р—РЅР°С‡РµРЅРёРµ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ 100");
 
             _discount = discount;
         }
@@ -123,8 +123,8 @@ namespace Discount
         public override string ToString()
         {
             return Item +
-                   $", скидка: {GetDiscount():0.00} ({_discount}%)" +
-                   $", итого: {TotalPrice:0.00}";
+                   $", СЃРєРёРґРєР°: {GetDiscount():0.00} ({_discount}%)" +
+                   $", РёС‚РѕРіРѕ: {TotalPrice:0.00}";
         }
 
         private double GetDiscount()
@@ -135,16 +135,16 @@ namespace Discount
 
     public abstract class Delivery : Item
     {
-        protected Delivery(string name, double price) : base("Доставка - " + name, price) { }
+        protected Delivery(string name, double price) : base("Р”РѕСЃС‚Р°РІРєР° - " + name, price) { }
     }
 
     public class Pickup : Delivery
     {
         private const double DefaultPrice = 10;
 
-        public Pickup() : base("самовывоз", DefaultPrice) { }
+        public Pickup() : base("СЃР°РјРѕРІС‹РІРѕР·", DefaultPrice) { }
 
-        public Pickup(double price) : base("самовывоз", price) { }
+        public Pickup(double price) : base("СЃР°РјРѕРІС‹РІРѕР·", price) { }
 
     }
 
@@ -152,9 +152,9 @@ namespace Discount
     {
         private const double DefaultPrice = 50;
 
-        public Courier() : base("курьерская доставка", DefaultPrice) { }
+        public Courier() : base("РєСѓСЂСЊРµСЂСЃРєР°СЏ РґРѕСЃС‚Р°РІРєР°", DefaultPrice) { }
 
-        public Courier(double price) : base("курьерская доставка", price) { }
+        public Courier(double price) : base("РєСѓСЂСЊРµСЂСЃРєР°СЏ РґРѕСЃС‚Р°РІРєР°", price) { }
     }
 
     public class Order
@@ -167,10 +167,10 @@ namespace Discount
             get => _delivery;
             set
             {
-                if (value == null) throw new ArgumentNullException(nameof(value), "Способ доставки не может быть пустым");
+                if (value == null) throw new ArgumentNullException(nameof(value), "РЎРїРѕСЃРѕР± РґРѕСЃС‚Р°РІРєРё РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј");
                 if (value is Courier && ExistsDiscounted())
                 {
-                    throw new ArgumentException("Доставка курьером невозможна, так как в заказе есть товары со скидкой. Удалите товары со скидкой из корзины, чтобы изменить тип доставки", nameof(Delivery));
+                    throw new ArgumentException("Р”РѕСЃС‚Р°РІРєР° РєСѓСЂСЊРµСЂРѕРј РЅРµРІРѕР·РјРѕР¶РЅР°, С‚Р°Рє РєР°Рє РІ Р·Р°РєР°Р·Рµ РµСЃС‚СЊ С‚РѕРІР°СЂС‹ СЃРѕ СЃРєРёРґРєРѕР№. РЈРґР°Р»РёС‚Рµ С‚РѕРІР°СЂС‹ СЃРѕ СЃРєРёРґРєРѕР№ РёР· РєРѕСЂР·РёРЅС‹, С‡С‚РѕР±С‹ РёР·РјРµРЅРёС‚СЊ С‚РёРї РґРѕСЃС‚Р°РІРєРё", nameof(Delivery));
                 }
 
                 _delivery = value;
@@ -189,7 +189,7 @@ namespace Discount
         {
             if (position is DiscountedPosition && Delivery is Courier)
             {
-                throw new ArgumentException("Позиция со скидкой не может быть добавлена в заказ с типом доставки курьером. Измените тип доставки на самовывоз", nameof(position));
+                throw new ArgumentException("РџРѕР·РёС†РёСЏ СЃРѕ СЃРєРёРґРєРѕР№ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РґРѕР±Р°РІР»РµРЅР° РІ Р·Р°РєР°Р· СЃ С‚РёРїРѕРј РґРѕСЃС‚Р°РІРєРё РєСѓСЂСЊРµСЂРѕРј. РР·РјРµРЅРёС‚Рµ С‚РёРї РґРѕСЃС‚Р°РІРєРё РЅР° СЃР°РјРѕРІС‹РІРѕР·", nameof(position));
             }
 
             _positionList.Add(position);
@@ -220,7 +220,7 @@ namespace Discount
                     Console.WriteLine(position);
 
             Console.WriteLine(Delivery);
-            Console.WriteLine($"Всего: {TotalPrice:0.00}");
+            Console.WriteLine($"Р’СЃРµРіРѕ: {TotalPrice:0.00}");
             Console.WriteLine("---");
         }
 
