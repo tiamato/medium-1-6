@@ -1,4 +1,4 @@
-п»їusing System;
+using System;
 using System.Collections.Generic;
 
 namespace Discount
@@ -7,104 +7,79 @@ namespace Discount
     {
         private static void Main()
         {
-            // РёСЃС…РѕРґРЅС‹Р№ С‚РѕРІР°СЂ
-            var item = new Item("РўРѕРІР°СЂ1", 1.25);
+            // исходный товар
+            var item = new Item("Товар1", 1.25);
 
-            // РЅР° РІРёС‚СЂРёРЅРµ 4 РїРѕР·РёС†РёРё, РёР· РЅРёС… 3 СЃ СЂР°Р·РЅС‹РјРё СЃРєРёРґРєР°РјРё
-            var showcase = new List<ISellablePosition>();
+            // на витрине 4 позиции, из них 3 с разными скидками
+            var order = new Order();
             ISellablePosition basePosition = new BasePosition(item);
-            showcase.Add(basePosition);
-            showcase.Add(new DiscountedPosition(basePosition, 10));
-            showcase.Add(new DiscountedPosition(basePosition, 20));
-            showcase.Add(new DiscountedPosition(basePosition, 30));
-            PrintShowcase(showcase);
+            order.AddPosition(basePosition);
+            order.AddPosition(new DiscountedPosition(basePosition, 10));
+            order.AddPosition(new DiscountedPosition(basePosition, 20));
+            order.AddPosition(new DiscountedPosition(basePosition, 30));
+            order.Print();
 
-            // РјРµРЅСЏРµРј С†РµРЅСѓ С‚РѕРІР°СЂР°
+            // меняем цену товара
             item.Price = 10.35f;
-            PrintShowcase(showcase);
+            order.Print();
 
-            // РјРµРЅСЏРµРј СЃРїРѕСЃРѕР± РґРѕСЃС‚Р°РІРєРё Рё С†РµРЅСѓ РґР»СЏ Р±Р°Р·РѕРІРѕРіРѕ
-            basePosition.Delivery = new Pickup(5);
-            PrintShowcase(showcase);
+            // меняем способ доставки и цену для базового
+            order.Delivery = new Pickup(5);
+            order.Print();
 
-            basePosition.Delivery = new Courier(25);
-            PrintShowcase(showcase);
+            //Присваиваем неверный тип доставки для заказа с товарами имеющими скидку - ошибка
+            try
+            {
+                order.Delivery = new Courier(25);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine("---");
+            }
 
-            //РџСЂРёСЃРІР°РёРІР°РµРј РЅРµРІРµСЂРЅС‹Р№ С‚РёРї РґРѕСЃС‚Р°РІРєРё РґР»СЏ С‚РѕРІР°СЂР° СЃРѕ СЃРєРёРґРєРѕР№ - РѕС€РёР±РєР°
-            //item11.Delivery = new Courier(15);
+            //Удаляем позиции со скидкой. Повторяем операцию
+            order.RemoveDiscounted();
+            order.Delivery = new Courier(25);
+            order.Print();
+
+            //Пытаемся добавить товар со скидкой - ошибка
+            try
+            {
+                order.AddPosition(new DiscountedPosition(basePosition, 30));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine("---");
+            }
+            order.Print();
+
 
             Console.Read();
-        }
-
-        private static void PrintShowcase(IEnumerable<ISellablePosition> showcase)
-        {
-            foreach (var position in showcase)
-            {
-                Console.WriteLine(position);
-            }
-            Console.WriteLine("---");
-        }
-    }
-
-    public abstract class Delivery
-    {
-        public double Price { get; }
-
-        protected Delivery(double price)
-        {
-            Price = price;
-        }
-
-        public override string ToString()
-        {
-            return $"{Price:0.00}";
-        }
-    }
-
-    public class Pickup : Delivery
-    {
-        private const double DefaultPrice = 10;
-
-        public Pickup(double price) : base(price) { }
-
-        public Pickup() : base(DefaultPrice) { }
-
-        public override string ToString()
-        {
-            return base.ToString() + " (СЃР°РјРѕРІС‹РІРѕР·)";
-        }
-    }
-
-    public class Courier : Delivery
-    {
-        private const double DefaultPrice = 50;
-
-        public Courier(double price) : base(price) { }
-
-        public Courier() : base(DefaultPrice) { }
-
-        public override string ToString()
-        {
-            return base.ToString() + " (РєСѓСЂСЊРµСЂРѕРј)";
         }
     }
 
     public class Item
     {
-        public readonly string Name;
+        private readonly string _name;
         public double Price;
 
         public Item(string name, double price)
         {
-            Name = name;
+            _name = name;
             Price = price;
+        }
+
+        public override string ToString()
+        {
+            return $"Наименование: {_name}, цена: {Price:0.00}";
         }
     }
 
     public interface ISellablePosition
     {
         Item Item { get; }
-        Delivery Delivery { get; set; }
         double TotalPrice { get; }
     }
 
@@ -113,19 +88,14 @@ namespace Discount
         public BasePosition(Item item)
         {
             Item = item;
-            Delivery = new Courier();
         }
 
         public Item Item { get; }
-        public Delivery Delivery { get; set; }
-        public double TotalPrice => Item.Price + Delivery.Price;
+        public double TotalPrice => Item.Price;
 
         public override string ToString()
         {
-            return $"РќР°РёРјРµРЅРѕРІР°РЅРёРµ: {Item.Name}" +
-                   $", С†РµРЅР°: {Item.Price:0.00}" +
-                   $", РґРѕСЃС‚Р°РІРєР°: {Delivery}" +
-                   $", РёС‚РѕРіРѕ: {TotalPrice:0.00}";
+            return Item.ToString();
         }
     }
 
@@ -133,6 +103,63 @@ namespace Discount
     {
         private readonly ISellablePosition _position;
         private readonly int _discount;
+
+        public DiscountedPosition(ISellablePosition position, int discount)
+        {
+            _position = position;
+
+            if (discount < 0)
+                throw new ArgumentOutOfRangeException(nameof(discount), "Значение не может быть меньше 0");
+
+            if (discount > 100)
+                throw new ArgumentOutOfRangeException(nameof(discount), "Значение не может быть больше 100");
+
+            _discount = discount;
+        }
+
+        public Item Item => _position.Item;
+        public double TotalPrice => Item.Price - GetDiscount();
+
+        public override string ToString()
+        {
+            return Item +
+                   $", скидка: {GetDiscount():0.00} ({_discount}%)" +
+                   $", итого: {TotalPrice:0.00}";
+        }
+
+        private double GetDiscount()
+        {
+            return Item.Price * _discount / 100;
+        }
+    }
+
+    public abstract class Delivery : Item
+    {
+        protected Delivery(string name, double price) : base("Доставка - " + name, price) { }
+    }
+
+    public class Pickup : Delivery
+    {
+        private const double DefaultPrice = 10;
+
+        public Pickup() : base("самовывоз", DefaultPrice) { }
+
+        public Pickup(double price) : base("самовывоз", price) { }
+
+    }
+
+    public class Courier : Delivery
+    {
+        private const double DefaultPrice = 50;
+
+        public Courier() : base("курьерская доставка", DefaultPrice) { }
+
+        public Courier(double price) : base("курьерская доставка", price) { }
+    }
+
+    public class Order
+    {
+        private readonly List<ISellablePosition> _positionList;
         private Delivery _delivery;
 
         public Delivery Delivery
@@ -140,36 +167,79 @@ namespace Discount
             get => _delivery;
             set
             {
-                if (!(value is Pickup))
+                if (value == null) throw new ArgumentNullException(nameof(value), "Способ доставки не может быть пустым");
+                if (value is Courier && ExistsDiscounted())
                 {
-                    throw new ArgumentException("РќРµРґРѕРїСѓСЃС‚РёРјС‹Р№ С‚РёРї РґРѕСЃС‚Р°РІРєРё");
+                    throw new ArgumentException("Доставка курьером невозможна, так как в заказе есть товары со скидкой. Удалите товары со скидкой из корзины, чтобы изменить тип доставки", nameof(Delivery));
                 }
+
                 _delivery = value;
             }
         }
 
-        public Item Item => _position.Item;
-        public double TotalPrice => Item.Price - GetDiscount() + Delivery.Price;
+        private double TotalPrice => GetTotalPrice();
 
-        public DiscountedPosition(ISellablePosition position, int discount)
+        public Order()
         {
-            _position = position;
-            _discount = discount;
-            _delivery = new Pickup();
+            Delivery = new Pickup();
+            _positionList = new List<ISellablePosition>();
         }
 
-        public override string ToString()
+        public void AddPosition(ISellablePosition position)
         {
-            return $"РќР°РёРјРµРЅРѕРІР°РЅРёРµ: {Item.Name}" +
-                   $", С†РµРЅР°: {Item.Price:0.00}" +
-                   $", СЃРєРёРґРєР°: {GetDiscount():0.00} ({_discount}%)" +
-                   $", РґРѕСЃС‚Р°РІРєР°: {_delivery}" +
-                   $", РёС‚РѕРіРѕ: {TotalPrice:0.00}";
+            if (position is DiscountedPosition && Delivery is Courier)
+            {
+                throw new ArgumentException("Позиция со скидкой не может быть добавлена в заказ с типом доставки курьером. Измените тип доставки на самовывоз", nameof(position));
+            }
+
+            _positionList.Add(position);
         }
 
-        private double GetDiscount()
+        public void RemovePosition(ISellablePosition position)
         {
-            return Item.Price * _discount / 100;
+            _positionList?.Remove(position);
+        }
+        
+        public void RemoveDiscounted()
+        {
+            if (_positionList == null) return;
+
+            var toRemove = new List<ISellablePosition>();
+
+            foreach (var position in _positionList)
+                if (position is DiscountedPosition) toRemove.Add(position);
+
+            foreach (var position in toRemove)
+                _positionList.Remove(position);
+        }
+
+        public void Print()
+        {
+            if (_positionList != null)
+                foreach (var position in _positionList)
+                    Console.WriteLine(position);
+
+            Console.WriteLine(Delivery);
+            Console.WriteLine($"Всего: {TotalPrice:0.00}");
+            Console.WriteLine("---");
+        }
+
+        private double GetTotalPrice()
+        {
+            var result = Delivery.Price;
+            foreach (var position in _positionList) result += position.TotalPrice;
+
+            return result;
+        }
+
+        private bool ExistsDiscounted()
+        {
+            if (_positionList != null)
+                foreach (var position in _positionList)
+                    if (position is DiscountedPosition)
+                        return true;
+
+            return false;
         }
     }
 }
