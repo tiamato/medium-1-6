@@ -7,20 +7,24 @@ namespace Discount
     {
         private static void Main()
         {
-            // исходный товар
-            var item = new Item("Товар1", 1.25);
+            // исходные товары
+            var item1 = new Item("Товар1", 1.25);
+            var item2 = new Item("Товар2", 2.15);
 
-            // на витрине 4 позиции, из них 3 с разными скидками
+            // в заказе 6 позиции, из них 4 с разными скидками
             var order = new Order();
-            ISellablePosition basePosition = new BasePosition(item);
-            order.AddPosition(basePosition);
-            order.AddPosition(new DiscountedPosition(basePosition, 10));
-            order.AddPosition(new DiscountedPosition(basePosition, 20));
-            order.AddPosition(new DiscountedPosition(basePosition, 30));
+            ISellablePosition basePosition1 = new BasePosition(item1);
+            order.Add(basePosition1);
+            order.Add(new DiscountedPosition(basePosition1, 10));
+            order.Add(new DiscountedPosition(basePosition1, 20));
+            order.Add(new DiscountedPosition(basePosition1, 30));
+            ISellablePosition basePosition2 = new BasePosition(item2);
+            order.Add(basePosition2);
+            order.Add(new DiscountedPosition(basePosition2, 15));
             order.Print();
 
             // меняем цену товара
-            item.Price = 10.35f;
+            item1.Price = 3f;
             order.Print();
 
             // меняем способ доставки и цену для базового
@@ -30,7 +34,7 @@ namespace Discount
             //Присваиваем неверный тип доставки для заказа с товарами имеющими скидку - ошибка
             try
             {
-                order.Delivery = new Courier(25);
+                order.Delivery = new Courier();
             }
             catch (Exception e)
             {
@@ -40,13 +44,13 @@ namespace Discount
 
             //Удаляем позиции со скидкой. Повторяем операцию
             order.RemoveDiscounted();
-            order.Delivery = new Courier(25);
+            order.Delivery = new Courier(15);
             order.Print();
 
             //Пытаемся добавить товар со скидкой - ошибка
             try
             {
-                order.AddPosition(new DiscountedPosition(basePosition, 30));
+                order.Add(new DiscountedPosition(basePosition1, 30));
             }
             catch (Exception e)
             {
@@ -55,6 +59,11 @@ namespace Discount
             }
             order.Print();
 
+            //меняем доставку на самовывоз и добавляем товар со скидкой
+            order.Delivery = new Pickup();
+            order.Remove(basePosition2);
+            order.Add(new DiscountedPosition(basePosition2, 25));
+            order.Print();
 
             Console.Read();
         }
@@ -68,12 +77,16 @@ namespace Discount
         public Item(string name, double price)
         {
             _name = name;
+
+            if (price < 0)
+                throw new ArgumentOutOfRangeException(nameof(price), "Значение не может быть меньше 0");
+
             Price = price;
         }
 
         public override string ToString()
         {
-            return $"Наименование: {_name}, цена: {Price:0.00}";
+            return $"Наименование: {_name}, цена: " + (Price == 0 ? "бесплатно" : $"{Price:0.00}");
         }
     }
 
@@ -140,7 +153,7 @@ namespace Discount
 
     public class Pickup : Delivery
     {
-        private const double DefaultPrice = 10;
+        private const double DefaultPrice = 0;
 
         public Pickup() : base("самовывоз", DefaultPrice) { }
 
@@ -185,7 +198,7 @@ namespace Discount
             _positionList = new List<ISellablePosition>();
         }
 
-        public void AddPosition(ISellablePosition position)
+        public void Add(ISellablePosition position)
         {
             if (position is DiscountedPosition && Delivery is Courier)
             {
@@ -195,7 +208,7 @@ namespace Discount
             _positionList.Add(position);
         }
 
-        public void RemovePosition(ISellablePosition position)
+        public void Remove(ISellablePosition position)
         {
             _positionList?.Remove(position);
         }
@@ -210,7 +223,7 @@ namespace Discount
                 if (position is DiscountedPosition) toRemove.Add(position);
 
             foreach (var position in toRemove)
-                _positionList.Remove(position);
+                Remove(position);
         }
 
         public void Print()
